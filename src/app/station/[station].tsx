@@ -1,72 +1,91 @@
 import { api } from "@/api";
-import { IOrderDetails } from "@/interfaces/IOrderDetails";
+import { EmptyOrderDetails, IOrderDetails } from "@/interfaces/IOrderDetails";
 import { Header } from "@/ui/components/header";
-import { router, useLocalSearchParams } from "expo-router";
+import clsx from "clsx";
+import { useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
-import { FlatList, Pressable, SafeAreaView, Text, TouchableOpacity, View } from "react-native";
-import AntDesign from "@expo/vector-icons/AntDesign";
+import { Pressable, SafeAreaView, Text, View } from "react-native";
+
+type TypeState = "INICIAR" | "FINALIZAR";
 
 export default function Station() {
   const { station } = useLocalSearchParams();
   const [stationName, setStationName] = useState("");
-  const [orders, setOrders] = useState<IOrderDetails[]>();
+  const [order, setOrder] = useState<IOrderDetails>(new EmptyOrderDetails());
+  const [state, setState] = useState<TypeState>("INICIAR");
+
+  const buttonStyle = clsx(
+    "flex-1 m-8 h-full rounded-xl justify-center items-center",
+    {
+      "bg-green-600": state == "INICIAR",
+      "bg-red-600": state == "FINALIZAR",
+    }
+  );
 
   useEffect(() => {
-    api.get(`order/${station}`).then((res) => {
-      setStationName(res.data.name);
-      setOrders(res.data.orders);
-    });
+    getNextOrder();
   }, []);
+
+  const getNextOrder = () => {
+    api.get(`order/${station}/next`).then((res) => {
+      setStationName(res.data.name);
+      if (res.data.nextOrder != null) {
+        setOrder(res.data.nextOrder);
+        const report = res.data.nextOrder.startEndReports.find(
+          (x) => x.stationId == station
+        );
+
+        if (report?.startedAt != undefined) setState("FINALIZAR");
+      }
+    });
+  };
+
+  const handleState = () => {
+    if (state == "INICIAR") {
+      api.put(`order/${order.id}/start`).then((res) => {
+        setState("FINALIZAR");
+      });
+    } else if (state == "FINALIZAR") {
+      api.put(`order/${order.id}/end`).then(() => {
+        getNextOrder();
+        setState("INICIAR");
+      });
+    }
+  };
 
   return (
     <>
       <Header title={stationName} />
-      <SafeAreaView>
-        <FlatList
-          data={orders}
-          keyExtractor={(item) => item.id}
-          numColumns={2}
-          renderItem={({ item }) => {
-            return (
-              <>
-                <View className="bg-primary flex-grow p-4 flex-1 rounded-lg m-2 flex-row justify-between">
-                  <View className="justify-center gap-2">
-                    <Text className="text-white font-bold text-xl">
-                      {item.title}
-                    </Text>
-                    {item.flavors.map((flavor) => (
-                      <Text key={item.id + flavor} className="text-white">
-                        {flavor}
-                      </Text>
-                    ))}
+      <SafeAreaView className="flex-row">
+        <View className="m-8 gap-4 flex-1 justify-center">
+          <Text className="text-black font-bold text-3xl">{order?.title}</Text>
+          <View>
+            {order.flavors.map((flavor) => (
+              <Text key={order.id + flavor} className="text-xl">
+                {flavor}
+              </Text>
+            ))}
+          </View>
 
-                    {item.doughType && (
-                      <Text className="text-white">
-                        Massa: {item.doughType}
-                      </Text>
-                    )}
+          {order.doughType && (
+            <Text className="text-xl">Massa: {order.doughType}</Text>
+          )}
 
-                    {item.observation.length > 0 && (
-                      <View className="bg-yellow-200 px-2 py-1 rounded">
-                        {item.observation.map((flavor) => (
-                          <Text
-                            key={item.id + flavor}
-                            className="text-yellow-800"
-                          >
-                            {flavor}
-                          </Text>
-                        ))}
-                      </View>
-                    )}
-                  </View>
-                  <TouchableOpacity className="bg-white rounded items-center justify-center w-20">
-                    <AntDesign name="caretright" size={24} color="red" />
-                  </TouchableOpacity>
-                </View>
-              </>
-            );
-          }}
-        />
+          {order.observation.length > 0 && (
+            <View className="bg-yellow-200 px-2 py-1 rounded">
+              {order.observation.map((flavor) => (
+                <Text key={order.id + flavor} className="text-yellow-800">
+                  {flavor}
+                </Text>
+              ))}
+            </View>
+          )}
+        </View>
+        <Pressable className={buttonStyle} onPress={handleState}>
+          <Text className="font-bold text-white text-6xl uppercase">
+            {state}
+          </Text>
+        </Pressable>
       </SafeAreaView>
     </>
   );
