@@ -1,16 +1,12 @@
+import { api } from "@/api";
 import { TextInput } from "@/ui/textInput";
+import { useToast } from "@/ui/toast";
 import { router } from "expo-router";
 import { useState } from "react";
-import {
-  NativeSyntheticEvent,
-  Pressable,
-  SafeAreaView,
-  Text,
-  TextInputChangeEventData,
-  View,
-} from "react-native";
+import { Pressable, SafeAreaView, Text, View } from "react-native";
 
 export default function Register() {
+  const toast = useToast();
   const [register, setRegister] = useState({
     invite: "",
     username: "",
@@ -23,7 +19,28 @@ export default function Register() {
   };
 
   const handleSubmit = () => {
-    console.log(register);
+    const { invite, password, repeatPassword, username } = register;
+    if (invite.length != 6) toast.error("Código de convite inválido");
+    else if (username.length < 3)
+      toast.error("O nome de usuário deve conter pelo menos 3 caracteres");
+    else if (password.length < 4)
+      toast.error("A senha deve ter pelo menos 4 caracteres");
+    else if (password != repeatPassword) toast.error("Senhas divergente");
+    else {
+      api
+        .post("/user/create", {
+          inviteCode: invite,
+          username,
+          password,
+        })
+        .then((res) => {
+          toast.success(res.data);
+          router.push("/")
+        })
+        .catch((e) => {
+          toast.error(e.response.data);
+        });
+    }
   };
 
   return (
