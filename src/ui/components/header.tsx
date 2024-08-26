@@ -1,6 +1,7 @@
 import { router } from "expo-router";
 import { Text, TouchableOpacity, View } from "react-native";
 import AntDesign from "@expo/vector-icons/AntDesign";
+import Fontisto from "@expo/vector-icons/Fontisto";
 
 interface IHeaderProps {
   title?: string;
@@ -14,6 +15,9 @@ export function Header({ title }: IHeaderProps) {
         <Text className="text-white font-bold text-xl">Voltar</Text>
       </TouchableOpacity>
       <Text className="text-white font-bold self-center text-xl">{title}</Text>
+      <TouchableOpacity onPress={() => router.push("/config")}>
+        <Fontisto name="player-settings" size={24} color="white" />
+      </TouchableOpacity>
     </View>
   );
 }

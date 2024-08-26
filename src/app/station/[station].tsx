@@ -11,7 +11,7 @@ type TypeState = "INICIAR" | "FINALIZAR";
 export default function Station() {
   const { station } = useLocalSearchParams();
   const [stationName, setStationName] = useState("");
-  const [order, setOrder] = useState<IOrderDetails>(new EmptyOrderDetails());
+  const [order, setOrder] = useState<IOrderDetails>();
   const [state, setState] = useState<TypeState>("INICIAR");
 
   const buttonStyle = clsx(
@@ -47,6 +47,7 @@ export default function Station() {
       });
     } else if (state == "FINALIZAR") {
       api.put(`order/${order.id}/end`).then(() => {
+        setOrder(null);
         getNextOrder();
         setState("INICIAR");
       });
@@ -56,37 +57,43 @@ export default function Station() {
   return (
     <>
       <Header title={stationName} />
-      <SafeAreaView className="flex-row">
-        <View className="m-8 gap-4 flex-1 justify-center">
-          <Text className="text-black font-bold text-3xl">{order?.title}</Text>
-          <View>
-            {order.flavors.map((flavor) => (
-              <Text key={order.id + flavor} className="text-xl">
-                {flavor}
+      {order != null && (
+        <>
+          <SafeAreaView className="flex-row">
+            <View className="m-8 gap-4 flex-1 justify-center">
+              <Text className="text-black font-bold text-3xl">
+                {order?.title}
               </Text>
-            ))}
-          </View>
+              <View>
+                {order.flavors.map((flavor) => (
+                  <Text key={order.id + flavor} className="text-xl">
+                    {flavor}
+                  </Text>
+                ))}
+              </View>
 
-          {order.doughType && (
-            <Text className="text-xl">Massa: {order.doughType}</Text>
-          )}
+              {order.doughType && (
+                <Text className="text-xl">Massa: {order.doughType}</Text>
+              )}
 
-          {order.observation.length > 0 && (
-            <View className="bg-yellow-200 px-2 py-1 rounded">
-              {order.observation.map((flavor) => (
-                <Text key={order.id + flavor} className="text-yellow-800">
-                  {flavor}
-                </Text>
-              ))}
+              {order.observation.length > 0 && (
+                <View className="bg-yellow-200 px-2 py-1 rounded">
+                  {order.observation.map((flavor) => (
+                    <Text key={order.id + flavor} className="text-yellow-800">
+                      {flavor}
+                    </Text>
+                  ))}
+                </View>
+              )}
             </View>
-          )}
-        </View>
-        <Pressable className={buttonStyle} onPress={handleState}>
-          <Text className="font-bold text-white text-6xl uppercase">
-            {state}
-          </Text>
-        </Pressable>
-      </SafeAreaView>
+            <Pressable className={buttonStyle} onPress={handleState}>
+              <Text className="font-bold text-white text-6xl uppercase">
+                {state}
+              </Text>
+            </Pressable>
+          </SafeAreaView>
+        </>
+      )}
     </>
   );
 }

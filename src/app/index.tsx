@@ -1,44 +1,25 @@
-import { api } from "@/api";
-import { Header } from "@/ui/components/header";
-import { Link } from "expo-router";
-import React, { useEffect, useState } from "react";
-import { FlatList, Pressable, SafeAreaView, Text } from "react-native";
+import { TextInput } from "@/ui/textInput";
+import { router } from "expo-router";
+import { Pressable, SafeAreaView, Text, View } from "react-native";
 
-export default function Page() {
-  const [stations, setStations] = useState([]);
-
-  useEffect(() => {
-    api
-      .get("station")
-      .then((res) => {
-        setStations(res.data);
-      })
-      .catch((e) => {
-        console.log(e);
-      });
-  }, []);
-
+export default function Login() {
   return (
-    <>
-      <Header title="Selecione sua estação de trabalho" />
-      <SafeAreaView className="flex-1 m-8">
-        <FlatList
-          data={stations}
-          keyExtractor={(item) => item.id}
-          numColumns={2}
-          renderItem={({ item }) => {
-            return (
-              <Link href={`/station/${item.id}`} asChild push>
-                <Pressable className="items-center bg-primary flex-grow p-5 flex-1 rounded-lg m-2 h-40 justify-center">
-                  <Text className="text-white font-bold text-4xl">
-                    {item.name}
-                  </Text>
-                </Pressable>
-              </Link>
-            );
-          }}
-        />
-      </SafeAreaView>
-    </>
+    <SafeAreaView className="items-center justify-center h-screen">
+      <View className="gap-4">
+        <Text className="text-5xl font-bold">Acesso - KDS</Text>
+        <TextInput placeholder="Usuário" />
+        <TextInput placeholder="Senha" password />
+        <Pressable className="bg-primary p-4 rounded-lg">
+          <Text className="text-white font-bold text-lg text-center uppercase">
+            Acessar
+          </Text>
+        </Pressable>
+        <Pressable onPress={() => router.push("/register")}>
+          <Text className="text-primary text-center">
+            Caso não tenha cadastro ainda, clique aqui
+          </Text>
+        </Pressable>
+      </View>
+    </SafeAreaView>
   );
 }
