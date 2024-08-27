@@ -3,6 +3,8 @@ import { Pressable, SafeAreaView, Text, View } from "react-native";
 import Entypo from "@expo/vector-icons/Entypo";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { router } from "expo-router";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import * as SecureStore from "expo-secure-store";
 
 export default function Config() {
   return (
@@ -26,6 +28,16 @@ export default function Config() {
           <Text className="text-white text-2xl font-bold">
             Gerenciar fluxos
           </Text>
+        </Pressable>
+        <Pressable
+          className="bg-primary p-4 rounded-xl flex-row gap-4"
+          onPress={async () => {
+            await SecureStore.deleteItemAsync("token");
+            router.push("/");
+          }}
+        >
+          <MaterialIcons name="exit-to-app" size={24} color="white" />
+          <Text className="text-white text-2xl font-bold">Sair</Text>
         </Pressable>
       </View>
     </SafeAreaView>

@@ -19,7 +19,8 @@
         {
           "initialOrientation": "LANDSCAPE"
         }
-      ]
+      ],
+      "expo-secure-store"
     ],
     "name": "kds-app",
     "slug": "kds-app"
