@@ -9,6 +9,7 @@ export default function Register() {
   const toast = useToast();
   const [register, setRegister] = useState({
     invite: "",
+    fullName:"",
     username: "",
     password: "",
     repeatPassword: "",
@@ -19,7 +20,7 @@ export default function Register() {
   };
 
   const handleSubmit = () => {
-    const { invite, password, repeatPassword, username } = register;
+    const { invite, password, repeatPassword, username, fullName } = register;
     if (invite.length != 6) toast.error("Código de convite inválido");
     else if (username.length < 3)
       toast.error("O nome de usuário deve conter pelo menos 3 caracteres");
@@ -30,6 +31,7 @@ export default function Register() {
       api
         .post("/user/create", {
           inviteCode: invite,
+          fullName,
           username,
           password,
         })
@@ -53,6 +55,12 @@ export default function Register() {
           value={register.invite}
           id="invite"
           type="numeric"
+        />
+        <TextInput
+          placeholder="Nome completo"
+          onChangeText={handleChange}
+          value={register.fullName}
+          id="fullName"
         />
         <TextInput
           placeholder="Usuário"

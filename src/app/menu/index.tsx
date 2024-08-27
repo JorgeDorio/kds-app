@@ -3,7 +3,6 @@ import { Header } from "@/ui/components/header";
 import { Link } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { FlatList, Pressable, SafeAreaView, Text } from "react-native";
-
 export default function Page() {
   const [stations, setStations] = useState([]);
 

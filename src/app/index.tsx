@@ -4,7 +4,8 @@ import { useToast } from "@/ui/toast";
 import { router } from "expo-router";
 import { useState } from "react";
 import { Pressable, SafeAreaView, Text, View } from "react-native";
-import * as SecureStore from 'expo-secure-store';
+import * as store from "expo-secure-store";
+import { jwtDecode } from "jwt-decode";
 
 export default function Login() {
   const toast = useToast();
@@ -30,7 +31,8 @@ export default function Login() {
           password,
         })
         .then((res) => {
-          SecureStore.setItem("token", res.data);
+          store.setItem("token", res.data);
+          store.setItem("user", JSON.stringify(jwtDecode(res.data)));
           router.push("/menu");
         })
         .catch((e) => {
